@@ -1,0 +1,44 @@
+---
+title: "Untitled"
+author: "Rania Ahmed"
+date: "September 10, 2019"
+output: html_document
+---
+
+```{r, echo=TRUE}
+library(survival)
+attach(lung)
+View(lung)
+```
+```{r, echo=TRUE}
+library(Hmisc)
+newtime <- cut2(lung$time, g=10)
+newlung <- cbind(lung, newtime)
+```
+```{r, echo=TRUE}
+surobj <- with(newlung, Surv(time, status))
+fit0 <- survfit(surobj~ newtime, data = newlung)
+summary(fit0)
+```
+```{r, echo=TRUE}
+plot(fit0, xlab = "survival time in months", ylab = "% survival", yscale = 100, main= "survival distribution")
+```
+```{r, echo=TRUE}
+fitsex <- survfit(surobj~sex+ newtime, data = newlung)
+summary(fitsex)
+```
+```{r, echo=TRUE}
+plot(fitsex, xlab = "survival time in months", ylab = "% survival", yscale = 100, col = c("red", "blue"),main="survival distribution in male and female")
+legend("topright", title = "Gender", c("Male", "Female"), fill=c("red", "blue"))
+```
+# the survival differience between male and female (logrank test)
+
+```{r, echo=TRUE}
+survdiff(surobj~sex, data = newlung)
+```
+# p_value is less than 0.05 so there is highly significant differience in survival between male and female
+#male will die more tham female
+#in the following the median in time in male is less than in the female
+```{r, echo=TRUE}
+survfit(surobj~sex, data = newlung)
+```

@@ -1,0 +1,51 @@
+---
+title: "multiple linear regression"
+author: "Rania Ahmed"
+date: "September 5, 2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+```{r muliple, echo=TRUE}
+muliple <- read.csv(file.choose(), header= T)
+attach(muliple)
+View(muliple)
+```
+
+```{r, echo=TRUE}
+library(dplyr)
+newdata <- mutate(muliple, dummy_sex= ifelse(muliple$SEX=="Male", 1,0), dummy_outcome =ifelse(muliple$outcome=="Success", 1,0), dummy_treatment = ifelse(muliple$Treatment=="Newdrug", 1,0))  
+View(newdata)
+```
+
+
+```{r, echo=TRUE}
+corelations <- cor(newdata[ ,4:7])
+library(corrplot)
+corrplot(corelations, method = "circle")
+corelations
+```
+#there is statistically significant only between outcome and treatment so the sex and hdl level don't affect the outcome
+# the interpertation
+```{r, echo=TRUE}
+newdata <- within(newdata, Treatment <- relevel(Treatment, ref = "Placebo"))
+logisticmodel <- glm(outcome~ Treatment+SEX+HDL_LEVEL, family = binomial, data = newdata)
+summary(logisticmodel)
+```
+
+```{r, echo=TRUE}
+library(Greg)
+printCrudeAndAdjustedModel(logisticmodel)[-1,]
+```
+# First interpertation for cruded value which means the value of OR in the presence of other variables
+1- the odds of success for patient recieving newdrug taking the considration the sex and HDL level is 10.09
+2- the odds of success for a male patient who is recieving newdrug and has HDL level is 2.33
+3- the odds of success for a patient in the presence of  HDL level taking the considration the sex and receiving new drug is 1.10
+# second interpretation for Adjusted values which mean the value of OR of variables regardless the presences of other variables.
+1- the odds of the success for the patient recieving new drug is 10.88
+2- the odds of the success for a male patient is 2.46
+3- the odds of success for a patient with HDL level is 1.07
+
+
